@@ -43,18 +43,27 @@ def find_real_ip(ip_list, HEADERS):
             'ip': ip
         }
 
-        res = requests.get(url=url, params=params, headers=HEADERS)
-        res = res.json()
+        res = requests.get(url=url, params=params, headers=HEADERS).json()
 
-        if res['status'] == 200:
+        if res.get('status') == 200:
+            protected_ips = res.get('protected_ip', {}).get('data', [])
+            real_ips = [d['ip_address'] for d in protected_ips] if protected_ips else []
+
+            whois_data = res.get('whois', {}).get('data', [])
+            org_name = whois_data[0]['org_name'] if whois_data else "Unknown"
+
+            port_data = res.get('port', {}).get('data', [])
+            opened_ports = [port['open_port_no'] for port in port_data] if port_data else []
+
             results.append({
-                'ip': res['ip'],
-                'real_ip': [d['ip_address'] for d in res['protected_ip']['data']],
-                'org': res['whois']['data'][0]['org_name'],
-                'opened_ports': [port['open_port_no'] for port in res['port']['data']],
+                'ip': ip,
+                'real_ip': real_ips,
+                'org': org_name,
+                'opened_ports': opened_ports,
             })
         else:
-            print(res['message'])
+            error_message = res.get('message', 'Unknown error')
+            print(f"Error: {error_message}")
             break
 
     return results
@@ -62,12 +71,18 @@ def find_real_ip(ip_list, HEADERS):
 
 def print_result(results):
     table = PrettyTable(['IP Addr', 'Real IP Addr', 'Organization', 'Opened Ports'])
+    real_ip_found = False 
 
     for r in results:
         real_ip = '\n'.join(r['real_ip'])
+        if real_ip:
+            real_ip_found = True
         table.add_row([r['ip'], real_ip, r['org'], r['opened_ports']])
 
     print(table)
+    if not real_ip_found:
+        print("No original IP addresses were found.")
+
 
 
 def main():
