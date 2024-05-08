@@ -33,9 +33,8 @@ def nslookup(domain):
         return ip_list
 
 
-
 def find_real_ip(ip_list, HEADERS):
-    url = 'https://api.criminalip.io/v1/ip/data'
+    url = 'https://api.criminalip.io/v1/asset/ip/report'
     
     results = []
     for ip in ip_list:
@@ -47,14 +46,24 @@ def find_real_ip(ip_list, HEADERS):
         res = res.json()
 
         if res['status'] == 200:
+            
+            protected_ip_data = res.get('protected_ip', {}).get('data', [])
+            real_ip_addresses = [d['ip_address'] for d in protected_ip_data]
+
+            org_data = res.get('whois', {}).get('data', [])
+            org_name = org_data[0].get('org_name', 'Unknown Organization') if org_data else 'Unknown Organization'
+
+            opened_ports_data = res.get('port', {}).get('data', [])
+            opened_ports = [port.get('open_port_no', 'Unknown Port') for port in opened_ports_data]
+
             results.append({
                 'ip': res['ip'],
-                'real_ip': [d['ip_address'] for d in res['protected_ip']['data']],
-                'org': res['whois']['data'][0]['org_name'],
-                'opened_ports': [port['open_port_no'] for port in res['port']['data']],
+                'real_ip': real_ip_addresses,
+                'org': org_name,
+                'opened_ports': opened_ports,
             })
         else:
-            print(res['message'])
+            print(res.get('message', 'An unknown error occurred'))
             break
 
     return results
