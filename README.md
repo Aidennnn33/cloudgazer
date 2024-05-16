@@ -16,27 +16,27 @@ Even if you have a free account, you can access an API key. You can find and use
 
 Clone repository:  
 
-```  
-$ git clone https://github.com/Aidennnn33/cloudgazer.git  
+```bash
+git clone https://github.com/Aidennnn33/cloudgazer.git
 ```
 
-```  
-$ cd cloudgazer 
+```bash
+cd cloudgazer
 ```
 
-```  
-$ python3 -m venv .venv  
-$ source .venv/bin/activate  
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
-```  
-$ pip3 install -r requirements.txt  
+```bash
+pip3 install -r requirements.txt
 ```
 
   
 
 # Getting started  
 
-```
-$ python3 cloudgazer.py
+```bash
+python3 cloudgazer.py
 ```
